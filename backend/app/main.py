@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from pathlib import Path
+from app.api import upload
 
 # 创建 FastAPI 应用
 app = FastAPI(
@@ -18,6 +19,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# 注册路由
+app.include_router(upload.router, prefix="/api", tags=["文件上传"])
 
 # 健康检查接口
 @app.get("/health")

@@ -1,5 +1,6 @@
 import { Upload, message } from 'antd'
 import { InboxOutlined } from '@ant-design/icons'
+import axios from 'axios'
 
 const { Dragger } = Upload
 
