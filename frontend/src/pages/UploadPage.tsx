@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Upload, message, Card, Radio, Button, Spin, Result } from 'antd'
 import { InboxOutlined, PlayCircleOutlined } from '@ant-design/icons'
 import axios from 'axios'
+import { useNavigate } from 'react-router-dom'
 
 const { Dragger } = Upload
 const { Button: RadioButton } = Radio
@@ -25,6 +26,7 @@ interface InferenceResult {
 }
 
 const UploadPage = () => {
+  const navigate = useNavigate()
   const [selectedModel, setSelectedModel] = useState<string>('auto')
   const [uploading, setUploading] = useState(false)
   const [inferring, setInferring] = useState(false)
@@ -78,6 +80,10 @@ const UploadPage = () => {
       
       if (response.data.cell_count > 0) {
         message.success(`推理完成，检测到 ${response.data.cell_count} 个细胞`)
+        // 跳转到结果页面
+        navigate(`/result?file_id=${response.data.file_id}`, { 
+          state: { result: response.data }
+        })
       } else {
         message.warning('未检测到细胞')
       }

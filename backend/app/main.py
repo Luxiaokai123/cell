@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 import uvicorn
 from pathlib import Path
 from app.api import upload
@@ -42,6 +43,20 @@ app.add_middleware(
 app.include_router(upload.router, prefix="/api", tags=["文件上传"])
 app.include_router(inference.router, prefix="/api", tags=["推理服务"])
 app.include_router(predict.router, prefix="/api", tags=["模型推理"])
+
+# 配置静态文件服务 - 允许访问上传的图片
+uploads_dir = Path(__file__).parent.parent / "temp" / "uploads"
+if uploads_dir.exists():
+    # 创建自定义中间件来为静态文件添加 CORS 头
+    @app.middleware("http")
+    async def add_cors_to_static(request, call_next):
+        response = await call_next(request)
+        if request.url.path.startswith("/uploads/"):
+            response.headers["Access-Control-Allow-Origin"] = "*"
+        return response
+    
+    app.mount("/uploads", StaticFiles(directory=str(uploads_dir)), name="uploads")
+    print(f"✓ Static files mounted: {uploads_dir}")
 
 # 健康检查接口
 @app.get("/health")
