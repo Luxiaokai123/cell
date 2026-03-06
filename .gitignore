@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Node
+node_modules/
+npm-debug.log*
+dist/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*~
+
+# 项目特定
+backend/temp/*
+!backend/temp/.gitkeep
+backend/logs/*
+!backend/logs/.gitkeep
+backend/exports/*
+!backend/exports/.gitkeep
+backend/weights/*.pth
+*.env
+.env.local
