@@ -33,7 +33,7 @@ async def upload_single_file(file: UploadFile = File(...)):
     filename = f"{timestamp}_{file.filename}"
     
     # 确保上传目录存在
-    upload_dir = Path(__file__).parent.parent / "temp" / "uploads"
+    upload_dir = Path(__file__).parent.parent.parent / "temp" / "uploads"
     upload_dir.mkdir(parents=True, exist_ok=True)
     
     file_path = upload_dir / filename
@@ -87,7 +87,7 @@ async def upload_batch_files(files: list[UploadFile] = File(...)):
             filename = f"{timestamp}_{file.filename}"
             
             # 确保上传目录存在
-            upload_dir = Path(__file__).parent.parent / "temp" / "uploads"
+            upload_dir = Path(__file__).parent.parent.parent / "temp" / "uploads"
             upload_dir.mkdir(parents=True, exist_ok=True)
             
             file_path = upload_dir / filename
