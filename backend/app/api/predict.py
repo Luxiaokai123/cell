@@ -37,6 +37,7 @@ class BoxResult(BaseModel):
     y2: float
     confidence: float
     class_name: str
+    mask: Optional[List[List[float]]] = None  # 实例分割掩码（多边形点列表）
 
 class InferenceResponse(BaseModel):
     """推理响应"""
@@ -280,6 +281,12 @@ async def inference(request: InferenceRequest):
                 confidences = result.boxes.conf.cpu().numpy()
                 classes = result.boxes.cls.cpu().numpy()
                 
+                # 检查是否有实例分割掩码
+                has_masks = result.masks is not None
+                if has_masks:
+                    # 获取掩码多边形数据
+                    masks_xy = result.masks.xy  # 多边形坐标列表
+                
                 # 细胞类型名称映射
                 cell_type_names = {
                     0: '血小板',
@@ -300,13 +307,22 @@ async def inference(request: InferenceRequest):
                     # 获取细胞类型名称，如果不存在则使用默认名称
                     class_name = cell_type_names.get(cls, f"细胞{cls}")
                     
+                    # 提取掩码数据（如果有）
+                    mask_points = None
+                    if has_masks and i < len(masks_xy):
+                        # 将 numpy 数组转换为 Python 列表
+                        mask_array = masks_xy[i]
+                        if mask_array is not None and len(mask_array) > 0:
+                            mask_points = mask_array.tolist()
+                    
                     boxes.append(BoxResult(
                         x1=float(x1),
                         y1=float(y1),
                         x2=float(x2),
                         y2=float(y2),
                         confidence=float(confidence_value),
-                        class_name=class_name
+                        class_name=class_name,
+                        mask=mask_points
                     ))
             
             cell_count = len(boxes)

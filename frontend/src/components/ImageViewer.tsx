@@ -1,4 +1,4 @@
-import { Stage, Layer, Image as KonvaImage, Group, Rect, Text } from 'react-konva'
+import { Stage, Layer, Image as KonvaImage, Group, Rect, Text, Line } from 'react-konva'
 import { useState, useEffect } from 'react'
 
 interface Annotation {
@@ -6,6 +6,7 @@ interface Annotation {
   label: string
   confidence: number
   color?: string
+  mask?: number[][] // 实例分割掩码（多边形点列表）[[x1,y1], [x2,y2], ...]
 }
 
 interface ImageViewerProps {
@@ -159,6 +160,17 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
 
               return (
                 <Group key={idx}>
+                  {/* 实例分割掩码（如果有）*/}
+                  {anno.mask && anno.mask.length > 2 && (
+                    <Line
+                      points={anno.mask.flatMap(point => [point[0] * scale, point[1] * scale])}
+                      fill={color}
+                      stroke={color}
+                      strokeWidth={Math.max(1, 1.5 / scale)}
+                      opacity={0.35}
+                      closed
+                    />
+                  )}
                   {/* 检测框 */}
                   <Rect
                     x={x1}

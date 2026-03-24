@@ -15,6 +15,7 @@ interface BoxResult {
   y2: number
   confidence: number
   class_name: string
+  mask?: number[][] // 实例分割掩码
 }
 
 interface InferenceResult {
@@ -314,7 +315,8 @@ const UploadPage = () => {
                       annotations={result.boxes.map(box => ({
                         bbox: [box.x1, box.y1, box.x2, box.y2] as [number, number, number, number],
                         label: box.class_name,
-                        confidence: box.confidence
+                        confidence: box.confidence,
+                        mask: box.mask
                       }))}
                       showAnnotations={true}
                       targetWidth={VIEWER_WIDTH}      // 和原图完全相同的尺寸！
