@@ -27,8 +27,8 @@ interface InferenceResult {
 }
 
 // 统一显示尺寸 - 两个图片区域用完全一样的尺寸
-const VIEWER_WIDTH = 350
-const VIEWER_HEIGHT = 350
+const VIEWER_WIDTH = 380
+const VIEWER_HEIGHT = 380
 
 const UploadPage = () => {
   const navigate = useNavigate()
@@ -126,10 +126,10 @@ const UploadPage = () => {
     }}>
       {/* 顶部标题栏 */}
       <div style={{ 
-        marginBottom: '24px',
+        marginBottom: '20px',
         textAlign: 'center',
         background: 'white',
-        padding: '20px',
+        padding: '16px',
         borderRadius: '8px',
         boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
       }}>
@@ -145,19 +145,19 @@ const UploadPage = () => {
         height: 'calc(100vh - 140px)',
         display: 'flex',
         flexDirection: 'column',
-        gap: '24px'
+        gap: '20px'
       }}>
         {/* 顶部区域：模型选择 + 上传/控制 */}
         <div style={{ 
           display: 'flex',
-          gap: '16px',
+          gap: '20px',
           flex: '0 0 100px'
         }}>
           {/* 左侧：模型选择 */}
           <Card 
             title="🔧 模型选择" 
             style={{ flex: '0 0 40%', height: '100%' }}
-            bodyStyle={{ padding: '12px' }}
+            bodyStyle={{ padding: '8px' }}
           >
             <Radio.Group 
               value={selectedModel} 
@@ -189,7 +189,7 @@ const UploadPage = () => {
                   </Upload>
                 }
                 style={{ height: '100%' }}
-                bodyStyle={{ padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                bodyStyle={{ padding: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               >
                 <p style={{ margin: 0, fontSize: '12px', color: '#888' }}>支持 JPEG/PNG 格式，不超过 20MB</p>
               </Card>
@@ -197,7 +197,7 @@ const UploadPage = () => {
               <Card 
                 title="🧠 推理控制"
                 style={{ height: '100%' }}
-                bodyStyle={{ padding: '12px' }}
+                bodyStyle={{ padding: '8px' }}
                 extra={
                   <Button size="small" onClick={handleReset}>
                     重新上传
@@ -228,7 +228,7 @@ const UploadPage = () => {
         <Card 
           title="📊 检测结果"
           style={{ flex: 1, overflow: 'hidden' }}
-          bodyStyle={{ height: 'calc(100% - 57px)', padding: '16px' }}
+          bodyStyle={{ height: 'calc(100% - 57px)', padding: '8px' }}
         >
           {uploading || inferring ? (
             <div style={{ 
@@ -242,7 +242,7 @@ const UploadPage = () => {
           ) : uploadedFileId ? (
             <div style={{ 
               display: 'flex',
-              gap: '16px',
+              gap: '8px',
               height: '100%',
               justifyContent: 'space-between'
             }}>
@@ -252,12 +252,12 @@ const UploadPage = () => {
                 display: 'flex',
                 flexDirection: 'column',
                 background: '#fafafa',
-                borderRadius: '8px',
+                borderRadius: '0px',
                 overflow: 'hidden',
                 maxWidth: '33%'
               }}>
                 <div style={{ 
-                  padding: '12px',
+                  padding: '8px',
                   background: '#e6f7ff',
                   borderBottom: '1px solid #d9d9d9',
                   textAlign: 'center'
@@ -270,7 +270,7 @@ const UploadPage = () => {
                   alignItems: 'center',
                   justifyContent: 'center',
                   overflow: 'auto',
-                  padding: '16px'
+                  padding: '8px'
                 }}>
                   <ImageViewer
                     imageUrl={`http://127.0.0.1:8000/uploads/${uploadedFileId}`}
@@ -293,7 +293,7 @@ const UploadPage = () => {
                 maxWidth: '33%'
               }}>
                 <div style={{ 
-                  padding: '12px',
+                  padding: '8px',
                   background: '#f6ffed',
                   borderBottom: '1px solid #d9d9d9',
                   textAlign: 'center'
@@ -306,7 +306,7 @@ const UploadPage = () => {
                   alignItems: 'center',
                   justifyContent: 'center',
                   overflow: 'auto',
-                  padding: '16px'
+                  padding: '8px'
                 }}>
                   {result ? (
                     <ImageViewer
@@ -339,7 +339,7 @@ const UploadPage = () => {
                 maxWidth: '33%'
               }}>
                 <div style={{ 
-                  padding: '12px',
+                  padding: '8px',
                   background: '#fff7e6',
                   borderBottom: '1px solid #d9d9d9',
                   textAlign: 'center'
@@ -348,7 +348,7 @@ const UploadPage = () => {
                 </div>
                 <div style={{ 
                   flex: 1,
-                  padding: '16px',
+                  padding: '8px',
                   overflow: 'auto'
                 }}>
                   {result ? (
@@ -367,7 +367,7 @@ const UploadPage = () => {
                       </div>
 
                       <div style={{ 
-                        padding: '12px',
+                        padding: '8px',
                         background: 'white',
                         borderRadius: '8px',
                         display: 'flex',
@@ -380,7 +380,7 @@ const UploadPage = () => {
                       </div>
 
                       <div style={{ 
-                        padding: '12px',
+                        padding: '8px',
                         background: 'white',
                         borderRadius: '8px',
                         display: 'flex',
@@ -395,7 +395,7 @@ const UploadPage = () => {
                       </div>
 
                       <div style={{ 
-                        padding: '12px',
+                        padding: '8px',
                         background: 'white',
                         borderRadius: '8px',
                         display: 'flex',
@@ -408,7 +408,7 @@ const UploadPage = () => {
                       </div>
 
                       <div style={{ 
-                        padding: '12px',
+                        padding: '8px',
                         background: 'white',
                         borderRadius: '8px',
                         display: 'flex',
@@ -424,7 +424,7 @@ const UploadPage = () => {
                         </span>
                       </div>
 
-                      <Space style={{ marginTop: '8px' }}>
+                      <Space style={{ marginTop: '16px', justifyContent: 'center' }} size="large">
                         <Button 
                           type="primary" 
                           icon={<ReloadOutlined />}

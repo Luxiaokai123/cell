@@ -77,7 +77,6 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
     <div style={{ 
       width: displaySize.width,
       height: displaySize.height,
-      borderRadius: '8px',
       overflow: 'hidden',
       background: '#f5f5f5',
       boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
