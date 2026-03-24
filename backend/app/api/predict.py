@@ -1,8 +1,10 @@
 from fastapi import APIRouter, HTTPException
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import Optional, List
 from pathlib import Path
 import time
+import io
 import numpy as np  # 显式导入 numpy
 
 router = APIRouter()
@@ -49,6 +51,13 @@ class InferenceResponse(BaseModel):
     boxes: List[BoxResult]
     processing_time: float
     message: str
+
+
+class ExportRequest(BaseModel):
+    """导出请求"""
+    boxes: List[BoxResult]
+    format: str  # 'excel' 或 'csv'
+    filename: str
 
 
 def get_model(model_name: str, base_dir: Path):
@@ -384,3 +393,60 @@ async def load_models():
         "status": "ok",
         "message": "模型将在推理时自动加载"
     }
+
+
+@router.post("/export")
+async def export_results(request: ExportRequest):
+    """导出检测结果为 Excel 或 CSV 文件"""
+    try:
+        import pandas as pd
+    except ImportError:
+        raise HTTPException(status_code=500, detail="pandas 未安装，请运行: pip install pandas openpyxl")
+    
+    # 构建 DataFrame
+    data = []
+    for i, box in enumerate(request.boxes):
+        data.append({
+            '序号': i + 1,
+            '细胞类型': box.class_name,
+            '置信度': f"{box.confidence:.4f}",
+            'X1': box.x1,
+            'Y1': box.y1,
+            'X2': box.x2,
+            'Y2': box.y2,
+            '宽度': box.x2 - box.x1,
+            '高度': box.y2 - box.y1,
+            '面积': (box.x2 - box.x1) * (box.y2 - box.y1)
+        })
+    
+    df = pd.DataFrame(data)
+    
+    # 导出为 Excel
+    if request.format == 'excel':
+        try:
+            from openpyxl import Workbook
+        except ImportError:
+            raise HTTPException(status_code=500, detail="openpyxl 未安装，请运行: pip install openpyxl")
+        
+        output = io.BytesIO()
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            df.to_excel(writer, index=False, sheet_name='检测结果')
+        output.seek(0)
+        
+        return StreamingResponse(
+            output,
+            media_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            headers={'Content-Disposition': f'attachment; filename={request.filename}.xlsx'}
+        )
+    
+    # 导出为 CSV
+    else:
+        output = io.StringIO()
+        df.to_csv(output, index=False, encoding='utf-8-sig')
+        output.seek(0)
+        
+        return StreamingResponse(
+            io.BytesIO(output.getvalue().encode('utf-8-sig')),
+            media_type='text/csv',
+            headers={'Content-Disposition': f'attachment; filename={request.filename}.csv'}
+        )

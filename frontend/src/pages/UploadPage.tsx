@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Upload, message, Card, Radio, Button, Spin, Slider } from 'antd'
-import { InboxOutlined, PlayCircleOutlined, UploadOutlined } from '@ant-design/icons'
+import { InboxOutlined, PlayCircleOutlined, UploadOutlined, FileExcelOutlined, FileTextOutlined } from '@ant-design/icons'
 import axios from 'axios'
 import ImageViewer from '@/components/ImageViewer'
 
@@ -112,6 +112,45 @@ const UploadPage = () => {
     setUploadedFileId(null)
     setUploadedFileName(null)
     setResult(null)
+  }
+
+  // 导出检测结果
+  const handleExport = async (format: 'excel' | 'csv') => {
+    if (!result || result.boxes.length === 0) {
+      message.warning('没有可导出的检测结果')
+      return
+    }
+    
+    try {
+      const response = await fetch('/api/export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          boxes: result.boxes,
+          format: format,
+          filename: `cell_detection_${Date.now()}`
+        })
+      })
+      
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.detail || '导出失败')
+      }
+      
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `cell_detection_${Date.now()}.${format === 'excel' ? 'xlsx' : 'csv'}`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      window.URL.revokeObjectURL(url)
+      
+      message.success(`导出成功: ${format === 'excel' ? 'Excel' : 'CSV'} 文件`)
+    } catch (error: any) {
+      message.error(`导出失败: ${error.message}`)
+    }
   }
 
   const uploadProps = {
@@ -393,9 +432,31 @@ const UploadPage = () => {
                   padding: '8px',
                   background: '#fff7e6',
                   borderBottom: '1px solid #d9d9d9',
-                  textAlign: 'center'
+                  textAlign: 'center',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
                 }}>
                   <strong>📈 统计结果</strong>
+                  {result && result.boxes.length > 0 && (
+                    <div>
+                      <Button 
+                        size="small" 
+                        icon={<FileExcelOutlined />}
+                        onClick={() => handleExport('excel')}
+                        style={{ marginRight: 8 }}
+                      >
+                        导出Excel
+                      </Button>
+                      <Button 
+                        size="small" 
+                        icon={<FileTextOutlined />}
+                        onClick={() => handleExport('csv')}
+                      >
+                        导出CSV
+                      </Button>
+                    </div>
+                  )}
                 </div>
                 <div style={{ 
                   flex: 1,
