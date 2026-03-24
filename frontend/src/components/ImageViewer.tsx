@@ -21,12 +21,19 @@ const colors = ['#FF0000', '#0066FF', '#00CC66', '#FF9900', '#9933FF', '#FF66CC'
 // 根据细胞类型获取固定颜色
 const getColorForCellType = (label: string): string => {
   const colorMap: Record<string, string> = {
+    // 中文名称
     '血小板': '#0066FF',
-    'red_blood_cell': '#FF0000',
-    'white_blood_cell': '#0066FF',
-    'platelet': '#0066FF',
-    '红细胞': '#FF0000',
     '白细胞': '#00CC66',
+    '红细胞': '#FF0000',
+    '淋巴细胞': '#FF9900',
+    '单核细胞': '#9933FF',
+    '嗜中性粒细胞': '#FF66CC',
+    '嗜酸性粒细胞': '#00CCCC',
+    '嗜碱性粒细胞': '#FFCC00',
+    // 英文名称
+    'platelet': '#0066FF',
+    'white_blood_cell': '#00CC66',
+    'red_blood_cell': '#FF0000',
     'rbc': '#FF0000',
     'wbc': '#00CC66',
     'platelets': '#0066FF',

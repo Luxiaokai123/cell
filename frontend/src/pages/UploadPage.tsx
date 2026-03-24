@@ -353,7 +353,7 @@ const UploadPage = () => {
                 }}>
                   {result ? (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                      <div style={{ 
+                      {/* <div style={{ 
                         textAlign: 'center',
                         padding: '20px',
                         background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
@@ -364,7 +364,40 @@ const UploadPage = () => {
                           {result.cell_count}
                         </div>
                         <div style={{ fontSize: '12px', opacity: 0.9 }}>细胞总数</div>
-                      </div>
+                      </div> */}
+
+                      {/* 细胞类型统计 */}
+                      {(() => {
+                        // 统计每种细胞类型的数量
+                        const typeCount: Record<string, number> = {}
+                        result.boxes.forEach(box => {
+                          const name = box.class_name || '未知'
+                          typeCount[name] = (typeCount[name] || 0) + 1
+                        })
+                        const types = Object.entries(typeCount).sort((a, b) => b[1] - a[1])
+                        
+                        return (
+                          <div style={{ 
+                            marginTop: '12px',
+                            padding: '8px',
+                            background: 'white',
+                            borderRadius: '8px'
+                          }}>
+                            <div style={{ fontWeight: 'bold', marginBottom: '8px', color: '#333' }}>细胞类型分布</div>
+                            {types.map(([name, count], idx) => (
+                              <div key={idx} style={{ 
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                padding: '4px 0',
+                                borderBottom: idx < types.length - 1 ? '1px dashed #ddd' : 'none'
+                              }}>
+                                <span style={{ color: '#666' }}>{name}</span>
+                                <span style={{ fontWeight: 'bold', color: '#1890ff' }}>{count} 个</span>
+                              </div>
+                            ))}
+                          </div>
+                        )
+                      })()}
 
                       <div style={{ 
                         padding: '8px',
@@ -423,53 +456,6 @@ const UploadPage = () => {
                             : 'N/A'}
                         </span>
                       </div>
-
-                      {/* 细胞类型统计 */}
-                      {(() => {
-                        // 统计每种细胞类型的数量
-                        const typeCount: Record<string, number> = {}
-                        result.boxes.forEach(box => {
-                          const name = box.class_name || '未知'
-                          typeCount[name] = (typeCount[name] || 0) + 1
-                        })
-                        const types = Object.entries(typeCount).sort((a, b) => b[1] - a[1])
-                        
-                        return (
-                          <div style={{ 
-                            marginTop: '12px',
-                            padding: '8px',
-                            background: '#f5f5f5',
-                            borderRadius: '8px'
-                          }}>
-                            <div style={{ fontWeight: 'bold', marginBottom: '8px', color: '#333' }}>细胞类型分布</div>
-                            {types.map(([name, count], idx) => (
-                              <div key={idx} style={{ 
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                padding: '4px 0',
-                                borderBottom: idx < types.length - 1 ? '1px dashed #ddd' : 'none'
-                              }}>
-                                <span style={{ color: '#666' }}>{name}</span>
-                                <span style={{ fontWeight: 'bold', color: '#1890ff' }}>{count} 个</span>
-                              </div>
-                            ))}
-                          </div>
-                        )
-                      })()}
-
-                      <Space style={{ marginTop: '16px', justifyContent: 'center' }} size="large">
-                        <Button 
-                          type="primary" 
-                          icon={<ReloadOutlined />}
-                          onClick={handleInference}
-                          loading={inferring}
-                        >
-                          重新推理
-                        </Button>
-                        <Button onClick={handleReset}>
-                          上传新图
-                        </Button>
-                      </Space>
                     </div>
                   ) : (
                     <div style={{ 
