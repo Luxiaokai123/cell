@@ -118,101 +118,163 @@ const UploadPage = () => {
   }
 
   return (
-    <div style={{ padding: 40, maxWidth: 800, margin: '0 auto' }}>
-      {/* 模型选择 */}
-      <Card title="🔧 模型选择" style={{ marginBottom: 24 }}>
-        <Radio.Group 
-          value={selectedModel} 
-          onChange={(e) => setSelectedModel(e.target.value)}
-          buttonStyle="solid"
-        >
-          <RadioButton value="auto">🤖 自动选择</RadioButton>
-          <RadioButton value="RDHS-YOLO">📊 RDHS-YOLO</RadioButton>
-          <RadioButton value="DAS-DETR">🔬 DAS-DETR</RadioButton>
-        </Radio.Group>
-        <div style={{ marginTop: 12, color: '#888', fontSize: 12 }}>
-          {selectedModel === 'auto' 
-            ? '系统将根据图像特征自动选择最优模型' 
-            : `强制使用 ${selectedModel} 模型进行推理`}
-        </div>
-      </Card>
+    <div style={{ 
+      minHeight: '100vh',
+      background: '#f0f2f5',
+      padding: '24px'
+    }}>
+      {/* 顶部标题栏 */}
+      <div style={{ 
+        marginBottom: '24px',
+        textAlign: 'center',
+        background: 'white',
+        padding: '20px',
+        borderRadius: '8px',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+      }}>
+        <h1 style={{ margin: 0, fontSize: '32px', color: '#1890ff' }}>
+          🔬 细胞智能计数系统
+        </h1>
+      </div>
 
-      {/* 上传区域 */}
-      {!showControl && (
-        <Card title="📤 上传细胞图像">
-          <Spin spinning={uploading}>
-            <Dragger {...uploadProps}>
-              <p className="ant-upload-drag-icon">
-                <InboxOutlined />
-              </p>
-              <p className="ant-upload-text">点击或拖拽文件到此区域上传</p>
-              <p className="ant-upload-hint">
-                支持 JPEG/PNG 格式，单个文件不超过 20MB
-              </p>
-            </Dragger>
-          </Spin>
-        </Card>
-      )}
-
-      {/* 推理控制 */}
-      {showControl && (
-        <Card 
-          title="🧠 手动推理模式"
-          extra={
-            <Button onClick={handleReset}>
-              重新上传
-            </Button>
-          }
-        >
-          <div style={{ textAlign: 'center', padding: '20px 0' }}>
-            <p>已上传文件：<strong>{uploadedFileName}</strong></p>
-            <p>选择模型：<strong>{selectedModel === 'auto' ? '自动选择' : selectedModel}</strong></p>
-            
-            <Button 
-              type="primary" 
-              size="large" 
-              icon={<PlayCircleOutlined />}
-              onClick={handleInference}
-              loading={inferring}
-              style={{ marginTop: 16 }}
+      {/* 主内容区域 - 左右分栏布局 */}
+      <div style={{ 
+        display: 'flex',
+        gap: '24px',
+        maxWidth: '1600px',
+        margin: '0 auto',
+        height: 'calc(100vh - 140px)'
+      }}>
+        {/* 左侧：模型选择和上传区域 */}
+        <div style={{ 
+          flex: '0 0 450px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '24px'
+        }}>
+          {/* 模型选择卡片 */}
+          <Card title="🔧 模型选择" style={{ flexShrink: 0 }}>
+            <Radio.Group 
+              value={selectedModel} 
+              onChange={(e) => setSelectedModel(e.target.value)}
+              buttonStyle="solid"
+              style={{ width: '100%' }}
             >
-              {inferring ? '推理中...' : '开始推理'}
-            </Button>
-          </div>
-        </Card>
-      )}
+              <RadioButton value="auto" style={{ width: '33%' }}>🤖 自动</RadioButton>
+              <RadioButton value="RDHS-YOLO" style={{ width: '33%' }}>RDHS-YOLO</RadioButton>
+              <RadioButton value="DAS-DETR" style={{ width: '33%' }}>DAS-DETR</RadioButton>
+            </Radio.Group>
+            <div style={{ marginTop: 12, color: '#888', fontSize: 12 }}>
+              {selectedModel === 'auto' 
+                ? '系统将根据图像特征自动选择最优模型' 
+                : `强制使用 ${selectedModel} 模型进行推理`}
+            </div>
+          </Card>
 
-      {/* 推理结果 */}
-      {result && !inferring && (
-        <Card title="📊 推理结果" style={{ marginTop: 24 }}>
-          <Result
-            status={result.cell_count > 0 ? 'success' : 'warning'}
-            title={result.cell_count > 0 ? `检测到 ${result.cell_count} 个细胞` : '未检测到细胞'}
-            subTitle={
-              <div>
-                <p>使用模型：<strong>{result.model_used}</strong></p>
-                <p>处理时间：{result.processing_time.toFixed(3)} 秒</p>
-                <p style={{ fontSize: 12, color: '#888' }}>{result.message}</p>
+          {/* 上传区域 */}
+          {!showControl && (
+            <Card title="📤 上传细胞图像" style={{ flex: 1 }}>
+              <Spin spinning={uploading}>
+                <Dragger {...uploadProps} style={{ padding: '40px 20px' }}>
+                  <p className="ant-upload-drag-icon">
+                    <InboxOutlined />
+                  </p>
+                  <p className="ant-upload-text">点击或拖拽文件到此上传</p>
+                  <p className="ant-upload-hint">
+                    支持 JPEG/PNG 格式，不超过 20MB
+                  </p>
+                </Dragger>
+              </Spin>
+            </Card>
+          )}
+
+          {/* 推理控制 */}
+          {showControl && (
+            <Card 
+              title="🧠 手动推理模式"
+              style={{ flex: 1 }}
+              extra={
+                <Button onClick={handleReset}>
+                  重新上传
+                </Button>
+              }
+            >
+              <div style={{ textAlign: 'center', padding: '40px 20px' }}>
+                <p style={{ marginBottom: 8 }}>已上传文件：</p>
+                <p style={{ fontWeight: 'bold', marginBottom: 16 }}>{uploadedFileName}</p>
+                <p style={{ marginBottom: 8 }}>选择模型：</p>
+                <p style={{ fontWeight: 'bold', marginBottom: 24 }}>
+                  {selectedModel === 'auto' ? '自动选择' : selectedModel}
+                </p>
+                
+                <Button 
+                  type="primary" 
+                  size="large" 
+                  icon={<PlayCircleOutlined />}
+                  onClick={handleInference}
+                  loading={inferring}
+                  style={{ width: '100%', height: '48px' }}
+                >
+                  {inferring ? '推理中...' : '开始推理'}
+                </Button>
               </div>
-            }
-            extra={[
-              <Button 
-                type="primary" 
-                key="retry"
-                onClick={handleInference}
-              >
-                重新推理
-              </Button>,
-              <Button 
-                key="reset"
-                onClick={handleReset}
-              >
-                上传新图片
-              </Button>
-            ]}
-          />
-        </Card>
-      )}
+            </Card>
+          )}
+        </div>
+
+        {/* 右侧：预览和结果展示区域 */}
+        <div style={{ 
+          flex: 1,
+          background: 'white',
+          borderRadius: '8px',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column'
+        }}>
+          <div style={{ 
+            padding: '16px',
+            borderBottom: '1px solid #e8e8e8',
+            background: '#fafafa'
+          }}>
+            <h2 style={{ margin: 0, fontSize: '20px', color: '#1890ff' }}>
+              📊 实时预览与结果
+            </h2>
+          </div>
+          
+          <div style={{ 
+            flex: 1,
+            padding: '24px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: '#fafafa'
+          }}>
+            {uploading || inferring ? (
+              <Spin size="large" tip={uploading ? "上传中..." : "推理中..."} />
+            ) : uploadedFileId ? (
+              <div style={{ textAlign: 'center' }}>
+                <img 
+                  src={`http://127.0.0.1:8000/uploads/${uploadedFileId}`}
+                  alt="Uploaded"
+                  style={{ 
+                    maxHeight: '500px',
+                    maxWidth: '100%',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                  }}
+                />
+                <p style={{ marginTop: 16, color: '#888' }}>{uploadedFileName}</p>
+              </div>
+            ) : (
+              <div style={{ textAlign: 'center', color: '#999' }}>
+                <InboxOutlined style={{ fontSize: '64px', marginBottom: '16px' }} />
+                <p>请上传图片以查看预览</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
