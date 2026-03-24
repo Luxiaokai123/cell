@@ -1,6 +1,6 @@
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { Upload, message, Card, Radio, Button, Spin, Space } from 'antd'
-import { InboxOutlined, PlayCircleOutlined, ReloadOutlined, HomeOutlined, UploadOutlined } from '@ant-design/icons'
+import { InboxOutlined, PlayCircleOutlined, ReloadOutlined, UploadOutlined } from '@ant-design/icons'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 import ImageViewer from '@/components/ImageViewer'
@@ -25,6 +25,10 @@ interface InferenceResult {
   processing_time: number
   message: string
 }
+
+// 统一显示尺寸 - 两个图片区域用完全一样的尺寸
+const VIEWER_WIDTH = 350
+const VIEWER_HEIGHT = 350
 
 const UploadPage = () => {
   const navigate = useNavigate()
@@ -143,11 +147,11 @@ const UploadPage = () => {
         flexDirection: 'column',
         gap: '24px'
       }}>
-        {/* 顶部区域：模型选择 + 上传/控制 - 压缩高度 */}
+        {/* 顶部区域：模型选择 + 上传/控制 */}
         <div style={{ 
           display: 'flex',
           gap: '16px',
-          flex: '0 0 140px'
+          flex: '0 0 100px'
         }}>
           {/* 左侧：模型选择 */}
           <Card 
@@ -239,16 +243,18 @@ const UploadPage = () => {
             <div style={{ 
               display: 'flex',
               gap: '16px',
-              height: '100%'
+              height: '100%',
+              justifyContent: 'space-between'
             }}>
-              {/* 原图 */}
+              {/* 原图 - 关键修改：使用 ImageViewer，保持和预测图完全相同的尺寸 */}
               <div style={{ 
-                flex: '0 0 35%',
+                flex: '1',
                 display: 'flex',
                 flexDirection: 'column',
                 background: '#fafafa',
                 borderRadius: '8px',
-                overflow: 'hidden'
+                overflow: 'hidden',
+                maxWidth: '33%'
               }}>
                 <div style={{ 
                   padding: '12px',
@@ -260,33 +266,31 @@ const UploadPage = () => {
                 </div>
                 <div style={{ 
                   flex: 1,
-                  padding: '16px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  overflow: 'auto'
+                  overflow: 'auto',
+                  padding: '16px'
                 }}>
-                  <img 
-                    src={`http://127.0.0.1:8000/uploads/${uploadedFileId}`}
-                    alt="原图"
-                    style={{ 
-                      maxHeight: '100%',
-                      maxWidth: '100%',
-                      borderRadius: '4px',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-                    }}
+                  <ImageViewer
+                    imageUrl={`http://127.0.0.1:8000/uploads/${uploadedFileId}`}
+                    annotations={[]}
+                    showAnnotations={false}
+                    targetWidth={VIEWER_WIDTH}
+                    targetHeight={VIEWER_HEIGHT}
                   />
                 </div>
               </div>
 
               {/* 预测图 */}
               <div style={{ 
-                flex: '0 0 35%',
+                flex: '1',
                 display: 'flex',
                 flexDirection: 'column',
                 background: '#fafafa',
                 borderRadius: '8px',
-                overflow: 'hidden'
+                overflow: 'hidden',
+                maxWidth: '33%'
               }}>
                 <div style={{ 
                   padding: '12px',
@@ -298,11 +302,11 @@ const UploadPage = () => {
                 </div>
                 <div style={{ 
                   flex: 1,
-                  padding: '16px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  overflow: 'auto'
+                  overflow: 'auto',
+                  padding: '16px'
                 }}>
                   {result ? (
                     <ImageViewer
@@ -310,12 +314,11 @@ const UploadPage = () => {
                       annotations={result.boxes.map(box => ({
                         bbox: [box.x1, box.y1, box.x2, box.y2] as [number, number, number, number],
                         label: box.class_name,
-                        confidence: box.confidence,
-                        color: undefined
+                        confidence: box.confidence
                       }))}
                       showAnnotations={true}
-                      maxWidth={350}
-                      maxHeight={400}
+                      targetWidth={VIEWER_WIDTH}      // 和原图完全相同的尺寸！
+                      targetHeight={VIEWER_HEIGHT}
                     />
                   ) : (
                     <div style={{ textAlign: 'center', color: '#999' }}>
@@ -332,7 +335,8 @@ const UploadPage = () => {
                 flexDirection: 'column',
                 background: '#fafafa',
                 borderRadius: '8px',
-                overflow: 'hidden'
+                overflow: 'hidden',
+                maxWidth: '33%'
               }}>
                 <div style={{ 
                   padding: '12px',

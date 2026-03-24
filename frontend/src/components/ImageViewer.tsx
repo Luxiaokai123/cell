@@ -1,8 +1,8 @@
 import { Stage, Layer, Image as KonvaImage, Group, Rect, Text } from 'react-konva'
-import { useState, useRef, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 
 interface Annotation {
-  bbox: [number, number, number, number] // [x1, y1, x2, y2]
+  bbox: [number, number, number, number] // [x1, y1, x2, y2] 基于原始图片尺寸的绝对像素坐标
   label: string
   confidence: number
   color?: string
@@ -12,8 +12,8 @@ interface ImageViewerProps {
   imageUrl: string
   annotations?: Annotation[]
   showAnnotations?: boolean
-  maxWidth?: number
-  maxHeight?: number
+  targetWidth?: number   // 目标显示宽度
+  targetHeight?: number  // 目标显示高度
 }
 
 const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8']
@@ -22,32 +22,28 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
   imageUrl,
   annotations = [],
   showAnnotations = true,
-  maxWidth = 400,
-  maxHeight = 300
+  targetWidth = 500,
+  targetHeight = 450
 }) => {
   const [image, setImage] = useState<HTMLImageElement | null>(null)
   const [scale, setScale] = useState(1)
-  const [displaySize, setDisplaySize] = useState({ width: 400, height: 300 })
+  const [displaySize, setDisplaySize] = useState({ width: targetWidth, height: targetHeight })
 
   useEffect(() => {
-    console.log('Loading image:', imageUrl)
     const img = new window.Image()
     img.crossOrigin = 'anonymous'
     img.src = imageUrl
     
-    // 如果是本地文件 URL，可能需要特殊处理
     if (imageUrl.startsWith('/')) {
       img.src = `${window.location.origin}${imageUrl}`
     }
     
     img.onload = () => {
-      console.log('Image loaded successfully:', img.width, 'x', img.height)
       setImage(img)
-      // 计算缩放比例以适应容器
+      // 计算缩放比例，使图片适应目标容器（保持宽高比）
       const scaleRatio = Math.min(
-        maxWidth / img.width,
-        maxHeight / img.height,
-        1
+        targetWidth / img.width,
+        targetHeight / img.height
       )
       setScale(scaleRatio)
       setDisplaySize({
@@ -56,32 +52,44 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
       })
     }
     
-    img.onerror = (error) => {
-      console.error('图片加载失败:', error, imageUrl)
+    img.onerror = () => {
+      console.error('图片加载失败:', imageUrl)
     }
-  }, [imageUrl])
+  }, [imageUrl, targetWidth, targetHeight])
+
+  if (!image) {
+    return (
+      <div style={{ 
+        width: targetWidth, 
+        height: targetHeight,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: '#f5f5f5',
+        borderRadius: '8px'
+      }}>
+        加载中...
+      </div>
+    )
+  }
 
   return (
     <div style={{ 
-      border: '1px solid #ddd', 
+      width: displaySize.width,
+      height: displaySize.height,
       borderRadius: '8px',
-      overflow: 'auto',
+      overflow: 'hidden',
       background: '#f5f5f5',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center'
+      boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
     }}>
-      {/* Canvas 标注层 */}
       <Stage width={displaySize.width} height={displaySize.height}>
         {/* 背景图层 */}
         <Layer>
-          {image && (
-            <KonvaImage
-              image={image}
-              width={displaySize.width}
-              height={displaySize.height}
-            />
-          )}
+          <KonvaImage
+            image={image}
+            width={displaySize.width}
+            height={displaySize.height}
+          />
         </Layer>
         
         {/* 标注图层 */}
@@ -89,12 +97,17 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
           <Layer>
             {annotations.map((anno, idx) => {
               const color = anno.color || colors[idx % colors.length]
+              // bbox 是基于原始图片尺寸的绝对坐标，乘以 scale 映射到显示尺寸
               const x1 = anno.bbox[0] * scale
               const y1 = anno.bbox[1] * scale
               const x2 = anno.bbox[2] * scale
               const y2 = anno.bbox[3] * scale
               const width = x2 - x1
               const height = y2 - y1
+
+              // 动态调整线宽和字体，保持视觉一致性
+              const strokeWidth = Math.max(2, 2 / scale)
+              const fontSize = Math.max(10, 12 / Math.sqrt(scale))
 
               return (
                 <Group key={idx}>
@@ -105,18 +118,26 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
                     width={width}
                     height={height}
                     stroke={color}
-                    strokeWidth={2}
-                    fill={`${color}20`} // 20% 透明度
+                    strokeWidth={strokeWidth}
+                    fill={`${color}20`}
+                  />
+                  {/* 标签背景 */}
+                  <Rect
+                    x={x1}
+                    y={y1 - fontSize - 6}
+                    width={Math.max(width, 100)}
+                    height={fontSize + 6}
+                    fill={color}
+                    opacity={0.9}
                   />
                   {/* 标签文本 */}
                   <Text
-                    x={x1}
-                    y={y1 - 20}
+                    x={x1 + 3}
+                    y={y1 - fontSize - 3}
                     text={`${anno.label} ${(anno.confidence * 100).toFixed(0)}%`}
-                    fontSize={12}
-                    fill={color}
+                    fontSize={fontSize}
+                    fill="white"
                     fontStyle="bold"
-                    padding={4}
                   />
                 </Group>
               )

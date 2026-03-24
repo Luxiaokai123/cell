@@ -13,7 +13,7 @@ const HomePage = () => {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: '40px'
+      padding: '20px'
     }}>
       <div style={{ 
         textAlign: 'center',
