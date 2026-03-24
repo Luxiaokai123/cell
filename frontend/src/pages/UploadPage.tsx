@@ -218,7 +218,7 @@ const UploadPage = () => {
           {/* 左侧：模型选择 + 参数调节 */}
           <Card 
             title="🔧 模型选择" 
-            style={{ flex: '0 0 40%', height: '100%' }}
+            style={{ flex: '0 0 55%', height: '100%' }}
             bodyStyle={{ padding: '8px' }}
           >
             <Radio.Group 
@@ -243,41 +243,43 @@ const UploadPage = () => {
             
             {/* 参数调节区域 */}
             <div style={{ marginTop: 12, paddingTop: 8, borderTop: '1px solid #f0f0f0' }}>
-              <div style={{ marginBottom: 8 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
-                  <span style={{ fontSize: '11px', color: '#666' }}>置信度阈值</span>
-                  <span style={{ fontSize: '11px', color: '#1890ff', fontWeight: 'bold' }}>{params.conf.toFixed(2)}</span>
+              <div style={{ display: 'flex', gap: 16 }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
+                    <span style={{ fontSize: '11px', color: '#666' }}>置信度阈值</span>
+                    <span style={{ fontSize: '11px', color: '#1890ff', fontWeight: 'bold' }}>{params.conf.toFixed(2)}</span>
+                  </div>
+                  <Slider
+                    min={0.1}
+                    max={0.9}
+                    step={0.05}
+                    value={params.conf}
+                    onChange={(v) => setParams({...params, conf: v})}
+                    tooltip={{ formatter: (v) => v?.toFixed(2) }}
+                    style={{ margin: 0 }}
+                  />
                 </div>
-                <Slider
-                  min={0.1}
-                  max={0.9}
-                  step={0.05}
-                  value={params.conf}
-                  onChange={(v) => setParams({...params, conf: v})}
-                  tooltip={{ formatter: (v) => v?.toFixed(2) }}
-                  style={{ margin: 0 }}
-                />
-              </div>
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
-                  <span style={{ fontSize: '11px', color: '#666' }}>IOU阈值</span>
-                  <span style={{ fontSize: '11px', color: '#1890ff', fontWeight: 'bold' }}>{params.iou.toFixed(2)}</span>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
+                    <span style={{ fontSize: '11px', color: '#666' }}>IOU阈值</span>
+                    <span style={{ fontSize: '11px', color: '#1890ff', fontWeight: 'bold' }}>{params.iou.toFixed(2)}</span>
+                  </div>
+                  <Slider
+                    min={0.3}
+                    max={0.9}
+                    step={0.05}
+                    value={params.iou}
+                    onChange={(v) => setParams({...params, iou: v})}
+                    tooltip={{ formatter: (v) => v?.toFixed(2) }}
+                    style={{ margin: 0 }}
+                  />
                 </div>
-                <Slider
-                  min={0.3}
-                  max={0.9}
-                  step={0.05}
-                  value={params.iou}
-                  onChange={(v) => setParams({...params, iou: v})}
-                  tooltip={{ formatter: (v) => v?.toFixed(2) }}
-                  style={{ margin: 0 }}
-                />
               </div>
             </div>
           </Card>
 
           {/* 右侧：上传或控制 */}
-          <div style={{ flex: '1', height: '100%' }}>
+          <div style={{ flex: '1 1 35%', height: '100%' }}>
             {!showControl ? (
               <Card 
                 title="📤 上传细胞图像"
