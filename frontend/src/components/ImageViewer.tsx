@@ -155,8 +155,10 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
               const height = y2 - y1
 
               // 动态调整线宽和字体，保持视觉一致性
-              const strokeWidth = Math.max(2, 2 / scale)
-              const fontSize = Math.max(10, 12 / Math.sqrt(scale))
+              const strokeWidth = Math.max(1.5, 1.5 / scale)
+              const fontSize = Math.max(8, 10 / Math.sqrt(scale))
+              const labelPadding = 4
+              const labelHeight = fontSize + labelPadding
 
               return (
                 <Group key={idx}>
@@ -184,17 +186,17 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
                   {/* 标签背景 */}
                   <Rect
                     x={x1}
-                    y={y1 - fontSize - 6}
-                    width={Math.max(width, 100)}
-                    height={fontSize + 6}
+                    y={y1 - labelHeight}
+                    width={Math.min(width, 70)}
+                    height={labelHeight}
                     fill={color}
-                    opacity={0.9}
+                    opacity={0.85}
                   />
                   {/* 标签文本 */}
                   <Text
-                    x={x1 + 3}
-                    y={y1 - fontSize - 3}
-                    text={`${anno.label} ${(anno.confidence * 100).toFixed(0)}%`}
+                    x={x1 + 2}
+                    y={y1 - labelHeight + 1}
+                    text={`${anno.label} ${Math.round(anno.confidence * 100)}%`}
                     fontSize={fontSize}
                     fill="white"
                     fontStyle="bold"

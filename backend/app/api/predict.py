@@ -288,16 +288,23 @@ async def inference(request: InferenceRequest):
                     masks_xy = result.masks.xy  # 多边形坐标列表
                 
                 # 细胞类型名称映射
-                cell_type_names = {
-                    0: '血小板',
-                    1: '白细胞',
-                    2: '红细胞',
-                    3: '淋巴细胞',
-                    4: '单核细胞',
-                    5: '嗜中性粒细胞',
-                    6: '嗜酸性粒细胞',
-                    7: '嗜碱性粒细胞',
-                }
+                # DSB2018 数据集只有 cell 一类
+                if model_name == "RDHS-YOLO":
+                    cell_type_names = {
+                        0: 'cell',
+                    }
+                else:
+                    # DAS-DETR 使用完整细胞分类
+                    cell_type_names = {
+                        0: '血小板',
+                        1: '白细胞',
+                        2: '红细胞',
+                        3: '淋巴细胞',
+                        4: '单核细胞',
+                        5: '嗜中性粒细胞',
+                        6: '嗜酸性粒细胞',
+                        7: '嗜碱性粒细胞',
+                    }
                 
                 for i in range(len(xyxy)):
                     x1, y1, x2, y2 = xyxy[i]
