@@ -27,7 +27,9 @@ MODEL_CONFIGS = {
 class InferenceRequest(BaseModel):
     """推理请求"""
     file_id: str
-    model: Optional[str] = None
+    model: str
+    conf: Optional[float] = None  # 置信度阈值，None 时使用模型默认值
+    iou: Optional[float] = None   # IOU阈值，None 时使用模型默认值
 
 class BoxResult(BaseModel):
     """单个检测框结果"""
@@ -267,9 +269,9 @@ async def inference(request: InferenceRequest):
                 model_name = fallback_model  # 使用成功加载的模型
                 config = config2
         
-        # 执行推理 - 使用模型配置中的参数
-        conf = config.get("conf", 0.25)
-        iou = config.get("iou", 0.45)
+        # 执行推理 - 优先使用用户传入的参数，否则使用模型默认参数
+        conf = request.conf if request.conf is not None else config.get("conf", 0.25)
+        iou = request.iou if request.iou is not None else config.get("iou", 0.45)
         try:
             results = model(str(file_path), verbose=False, conf=conf, iou=iou)
             result = results[0]

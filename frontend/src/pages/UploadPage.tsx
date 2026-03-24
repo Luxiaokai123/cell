@@ -1,12 +1,16 @@
 import { useState } from 'react'
-import { Upload, message, Card, Radio, Button, Spin, Space } from 'antd'
-import { InboxOutlined, PlayCircleOutlined, ReloadOutlined, UploadOutlined } from '@ant-design/icons'
+import { Upload, message, Card, Radio, Button, Spin, Slider } from 'antd'
+import { InboxOutlined, PlayCircleOutlined, UploadOutlined } from '@ant-design/icons'
 import axios from 'axios'
-import { useNavigate } from 'react-router-dom'
 import ImageViewer from '@/components/ImageViewer'
 
-const { Dragger } = Upload
 const { Button: RadioButton } = Radio
+
+// 模型默认参数配置
+const MODEL_DEFAULT_PARAMS: Record<string, { conf: number; iou: number }> = {
+  'RDHS-YOLO': { conf: 0.2, iou: 0.7 },
+  'DAS-DETR': { conf: 0.5, iou: 0.7 }
+}
 
 interface BoxResult {
   x1: number
@@ -32,7 +36,6 @@ const VIEWER_WIDTH = 380
 const VIEWER_HEIGHT = 380
 
 const UploadPage = () => {
-  const navigate = useNavigate()
   const [selectedModel, setSelectedModel] = useState<string>('RDHS-YOLO')
   const [uploading, setUploading] = useState(false)
   const [inferring, setInferring] = useState(false)
@@ -40,6 +43,12 @@ const UploadPage = () => {
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null)
   const [result, setResult] = useState<InferenceResult | null>(null)
   const [showControl, setShowControl] = useState(false)
+  
+  // 参数调节状态
+  const [params, setParams] = useState({
+    conf: MODEL_DEFAULT_PARAMS['RDHS-YOLO'].conf,
+    iou: MODEL_DEFAULT_PARAMS['RDHS-YOLO'].iou
+  })
 
   const handleUpload = async (file: File) => {
     setUploading(true)
@@ -76,9 +85,11 @@ const UploadPage = () => {
     setResult(null)
     
     try {
-      const requestData: { file_id: string; model: string } = { 
+      const requestData: { file_id: string; model: string; conf: number; iou: number } = { 
         file_id: uploadedFileId,
-        model: selectedModel
+        model: selectedModel,
+        conf: params.conf,
+        iou: params.iou
       }
       
       const response = await axios.post('/api/inference', requestData)
@@ -152,9 +163,9 @@ const UploadPage = () => {
         <div style={{ 
           display: 'flex',
           gap: '20px',
-          flex: '0 0 100px'
+          flex: '0 0 140px'
         }}>
-          {/* 左侧：模型选择 */}
+          {/* 左侧：模型选择 + 参数调节 */}
           <Card 
             title="🔧 模型选择" 
             style={{ flex: '0 0 40%', height: '100%' }}
@@ -162,7 +173,12 @@ const UploadPage = () => {
           >
             <Radio.Group 
               value={selectedModel} 
-              onChange={(e) => setSelectedModel(e.target.value)}
+              onChange={(e) => {
+                const newModel = e.target.value
+                setSelectedModel(newModel)
+                // 切换模型时更新为该模型的默认参数
+                setParams(MODEL_DEFAULT_PARAMS[newModel])
+              }}
               buttonStyle="solid"
               style={{ width: '100%' }}
             >
@@ -173,6 +189,40 @@ const UploadPage = () => {
               {selectedModel === 'RDHS-YOLO'
                 ? '实例分割模型，可精确勾勒细胞边界轮廓' 
                 : '目标检测模型，快速定位细胞位置'}
+            </div>
+            
+            {/* 参数调节区域 */}
+            <div style={{ marginTop: 12, paddingTop: 8, borderTop: '1px solid #f0f0f0' }}>
+              <div style={{ marginBottom: 8 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
+                  <span style={{ fontSize: '11px', color: '#666' }}>置信度阈值</span>
+                  <span style={{ fontSize: '11px', color: '#1890ff', fontWeight: 'bold' }}>{params.conf.toFixed(2)}</span>
+                </div>
+                <Slider
+                  min={0.1}
+                  max={0.9}
+                  step={0.05}
+                  value={params.conf}
+                  onChange={(v) => setParams({...params, conf: v})}
+                  tooltip={{ formatter: (v) => v?.toFixed(2) }}
+                  style={{ margin: 0 }}
+                />
+              </div>
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
+                  <span style={{ fontSize: '11px', color: '#666' }}>IOU阈值</span>
+                  <span style={{ fontSize: '11px', color: '#1890ff', fontWeight: 'bold' }}>{params.iou.toFixed(2)}</span>
+                </div>
+                <Slider
+                  min={0.3}
+                  max={0.9}
+                  step={0.05}
+                  value={params.iou}
+                  onChange={(v) => setParams({...params, iou: v})}
+                  tooltip={{ formatter: (v) => v?.toFixed(2) }}
+                  style={{ margin: 0 }}
+                />
+              </div>
             </div>
           </Card>
 
