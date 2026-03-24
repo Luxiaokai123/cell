@@ -308,7 +308,7 @@ const BatchPage = () => {
             </div>
           </Col>
           <Col span={12}>
-            <Row gutter={16}>
+            <Row gutter={16} style={{ marginTop: 24 }}>
               <Col span={12}>
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
