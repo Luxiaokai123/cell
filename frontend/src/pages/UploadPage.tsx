@@ -33,8 +33,8 @@ interface InferenceResult {
 }
 
 // 统一显示尺寸 - 两个图片区域用完全一样的尺寸
-const VIEWER_WIDTH = 380
-const VIEWER_HEIGHT = 380
+const VIEWER_WIDTH = 350
+const VIEWER_HEIGHT = 350
 
 const UploadPage = () => {
   const navigate = useNavigate()
@@ -473,11 +473,11 @@ const UploadPage = () => {
                 </div>
                 <div style={{ 
                   flex: 1,
-                  padding: '8px',
+                  padding: '4px 8px 8px',
                   overflow: 'auto'
                 }}>
                   {result ? (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                       {/* <div style={{ 
                         textAlign: 'center',
                         padding: '20px',
@@ -525,9 +525,9 @@ const UploadPage = () => {
                       })()}
 
                       <div style={{ 
-                        padding: '8px',
+                        padding: '4px 8px',
                         background: 'white',
-                        borderRadius: '8px',
+                        borderRadius: '4px',
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center',
@@ -538,9 +538,9 @@ const UploadPage = () => {
                       </div>
 
                       <div style={{ 
-                        padding: '8px',
+                        padding: '4px 8px',
                         background: 'white',
-                        borderRadius: '8px',
+                        borderRadius: '4px',
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center',
@@ -553,9 +553,9 @@ const UploadPage = () => {
                       </div>
 
                       <div style={{ 
-                        padding: '8px',
+                        padding: '4px 8px',
                         background: 'white',
-                        borderRadius: '8px',
+                        borderRadius: '4px',
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center',
@@ -566,9 +566,9 @@ const UploadPage = () => {
                       </div>
 
                       <div style={{ 
-                        padding: '8px',
+                        padding: '4px 8px',
                         background: 'white',
-                        borderRadius: '8px',
+                        borderRadius: '4px',
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center',
