@@ -12,6 +12,8 @@ interface ImageViewerProps {
   imageUrl: string
   annotations?: Annotation[]
   showAnnotations?: boolean
+  maxWidth?: number
+  maxHeight?: number
 }
 
 const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8']
@@ -19,11 +21,13 @@ const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD'
 const ImageViewer: React.FC<ImageViewerProps> = ({
   imageUrl,
   annotations = [],
-  showAnnotations = true
+  showAnnotations = true,
+  maxWidth = 400,
+  maxHeight = 300
 }) => {
-  const [imageSize, setImageSize] = useState({ width: 800, height: 600 })
   const [image, setImage] = useState<HTMLImageElement | null>(null)
   const [scale, setScale] = useState(1)
+  const [displaySize, setDisplaySize] = useState({ width: 400, height: 300 })
 
   useEffect(() => {
     console.log('Loading image:', imageUrl)
@@ -38,16 +42,18 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
     
     img.onload = () => {
       console.log('Image loaded successfully:', img.width, 'x', img.height)
-      // 计算合适的显示尺寸（最大宽度 1200px）
-      const maxWidth = 1200
-      const scaleRatio = Math.min(1, maxWidth / img.width)
+      setImage(img)
+      // 计算缩放比例以适应容器
+      const scaleRatio = Math.min(
+        maxWidth / img.width,
+        maxHeight / img.height,
+        1
+      )
       setScale(scaleRatio)
-      
-      setImageSize({ 
-        width: img.width * scaleRatio, 
-        height: img.height * scaleRatio 
+      setDisplaySize({
+        width: img.width * scaleRatio,
+        height: img.height * scaleRatio
       })
-      setImage(img)  // 使用 state 存储图片，触发重新渲染
     }
     
     img.onerror = (error) => {
@@ -60,30 +66,20 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
       border: '1px solid #ddd', 
       borderRadius: '8px',
       overflow: 'auto',
-      background: '#f5f5f5'
+      background: '#f5f5f5',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center'
     }}>
-      {/* 先显示原始图片 */}
-      {image && (
-        <img 
-          src={imageUrl} 
-          alt="Loaded"
-          style={{ 
-            maxWidth: '100%', 
-            display: 'block',
-            marginBottom: 10
-          }} 
-        />
-      )}
-      
-      {/* 再显示 Canvas 标注层 */}
-      <Stage width={imageSize.width} height={imageSize.height}>
+      {/* Canvas 标注层 */}
+      <Stage width={displaySize.width} height={displaySize.height}>
         {/* 背景图层 */}
         <Layer>
           {image && (
             <KonvaImage
               image={image}
-              width={imageSize.width}
-              height={imageSize.height}
+              width={displaySize.width}
+              height={displaySize.height}
             />
           )}
         </Layer>
