@@ -185,16 +185,18 @@ const UploadPage = () => {
         borderRadius: '8px',
         boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
         display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center'
+        justifyContent: 'center',
+        alignItems: 'center',
+        position: 'relative'
       }}>
-        <h1 style={{ margin: 0, fontSize: '32px', color: '#1890ff' }}>
+        <h1 style={{ margin: 0, fontSize: '28px', color: '#1890ff' }}>
           🔬 细胞智能计数系统
         </h1>
         <Button 
           icon={<DatabaseOutlined />} 
           onClick={() => navigate('/batch')}
           type="primary"
+          style={{ position: 'absolute', right: '16px' }}
         >
           批量检测
         </Button>
@@ -232,8 +234,8 @@ const UploadPage = () => {
               buttonStyle="solid"
               style={{ width: '100%' }}
             >
-              <RadioButton value="RDHS-YOLO" style={{ width: '50%' }}>实例分割 RDHS-YOLO</RadioButton>
-              <RadioButton value="DAS-DETR" style={{ width: '50%' }}>目标检测 DAS-DETR</RadioButton>
+              <RadioButton value="RDHS-YOLO" style={{ width: '30%' }}>实例分割 RDHS-YOLO</RadioButton>
+              <RadioButton value="DAS-DETR" style={{ width: '30%' }}>目标检测 DAS-DETR</RadioButton>
             </Radio.Group>
             <div style={{ marginTop: 8, color: '#888', fontSize: 11 }}>
               {selectedModel === 'RDHS-YOLO'
@@ -525,9 +527,9 @@ const UploadPage = () => {
                       })()}
 
                       <div style={{ 
-                        padding: '4px 8px',
+                        padding: '8px',
                         background: 'white',
-                        borderRadius: '4px',
+                        borderRadius: '8px',
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center',
@@ -538,9 +540,9 @@ const UploadPage = () => {
                       </div>
 
                       <div style={{ 
-                        padding: '4px 8px',
+                        padding: '8px',
                         background: 'white',
-                        borderRadius: '4px',
+                        borderRadius: '8px',
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center',
@@ -553,9 +555,9 @@ const UploadPage = () => {
                       </div>
 
                       <div style={{ 
-                        padding: '4px 8px',
+                        padding: '8px',
                         background: 'white',
-                        borderRadius: '4px',
+                        borderRadius: '8px',
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center',
@@ -566,9 +568,9 @@ const UploadPage = () => {
                       </div>
 
                       <div style={{ 
-                        padding: '4px 8px',
+                        padding: '8px',
                         background: 'white',
-                        borderRadius: '4px',
+                        borderRadius: '8px',
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center',

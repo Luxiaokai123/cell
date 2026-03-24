@@ -266,13 +266,18 @@ const BatchPage = () => {
         borderRadius: '8px',
         boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
         display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center'
+        justifyContent: 'center',
+        alignItems: 'center',
+        position: 'relative'
       }}>
         <h1 style={{ margin: 0, fontSize: '28px', color: '#1890ff' }}>
-          📁 批量细胞检测
+          🔬 细胞智能计数系统（批量检测）
         </h1>
-        <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/upload')}>
+        <Button 
+          icon={<ArrowLeftOutlined />} 
+          onClick={() => navigate('/upload')}
+          style={{ position: 'absolute', right: '16px' }}
+        >
           返回单图检测
         </Button>
       </div>
