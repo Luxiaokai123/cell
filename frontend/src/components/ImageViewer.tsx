@@ -16,7 +16,46 @@ interface ImageViewerProps {
   targetHeight?: number  // 目标显示高度
 }
 
-const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8']
+const colors = ['#FF0000', '#0066FF', '#00CC66', '#FF9900', '#9933FF', '#FF66CC', '#00CCCC']
+
+// 根据细胞类型获取固定颜色
+const getColorForCellType = (label: string): string => {
+  const colorMap: Record<string, string> = {
+    'red_blood_cell': '#FF0000',
+    'white_blood_cell': '#0066FF',
+    'platelet': '#00CC66',
+    'rbc': '#FF0000',
+    'wbc': '#0066FF',
+    'platelets': '#00CC66',
+  }
+  
+  // 转换为小写进行匹配
+  const lowerLabel = label.toLowerCase()
+  
+  // 优先匹配特定细胞类型关键词
+  for (const key of Object.keys(colorMap)) {
+    if (lowerLabel.includes(key)) {
+      return colorMap[key]
+    }
+  }
+  
+  // 对于 cell_1, cell_2, cell_3 等，使用不同颜色
+  if (lowerLabel.match(/^cell_\d+$/)) {
+    // 提取数字后缀
+    const match = lowerLabel.match(/cell_(\d+)/)
+    if (match) {
+      const num = parseInt(match[1])
+      return colors[num % colors.length]
+    }
+  }
+  
+  // 默认使用基于标签的哈希颜色
+  let hash = 0
+  for (let i = 0; i < label.length; i++) {
+    hash = label.charCodeAt(i) + ((hash << 5) - hash)
+  }
+  return colors[Math.abs(hash) % colors.length]
+}
 
 const ImageViewer: React.FC<ImageViewerProps> = ({
   imageUrl,
@@ -95,7 +134,7 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
         {showAnnotations && annotations.length > 0 && (
           <Layer>
             {annotations.map((anno, idx) => {
-              const color = anno.color || colors[idx % colors.length]
+              const color = anno.color || getColorForCellType(anno.label)
               // bbox 是基于原始图片尺寸的绝对坐标，乘以 scale 映射到显示尺寸
               const x1 = anno.bbox[0] * scale
               const y1 = anno.bbox[1] * scale
