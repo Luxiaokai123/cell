@@ -60,6 +60,34 @@ class ExportRequest(BaseModel):
     filename: str
 
 
+class BatchInferenceRequest(BaseModel):
+    """批量推理请求"""
+    file_ids: List[str]
+    model: str
+    conf: Optional[float] = None
+    iou: Optional[float] = None
+
+
+class BatchResult(BaseModel):
+    """单个文件结果"""
+    file_id: str
+    file_name: str
+    model_used: str
+    cell_count: int
+    processing_time: float
+    status: str  # success, failed
+    error: Optional[str] = None
+
+
+class BatchInferenceResponse(BaseModel):
+    """批量推理响应"""
+    total: int
+    completed: int
+    failed: int
+    results: List[BatchResult]
+    summary: dict
+
+
 def get_model(model_name: str, base_dir: Path):
     """获取或加载模型 - 根据模型类型使用不同的加载方式"""
     # ============ 第一步：注册自定义模块（解决 DAS-DETR 权重加载问题）============
@@ -450,3 +478,76 @@ async def export_results(request: ExportRequest):
             media_type='text/csv',
             headers={'Content-Disposition': f'attachment; filename={request.filename}.csv'}
         )
+
+
+@router.post("/batch/inference", response_model=BatchInferenceResponse)
+async def batch_inference(request: BatchInferenceRequest):
+    """批量推理接口"""
+    base_dir = Path(__file__).parent.parent.parent
+    
+    results = []
+    total_cells = 0
+    total_time = 0
+    
+    for file_id in request.file_ids:
+        start_time = time.time()
+        try:
+            # 构建文件路径
+            file_path = base_dir / "temp" / "uploads" / file_id
+            if not file_path.exists():
+                file_path = base_dir / "app" / "temp" / "uploads" / file_id
+            
+            if not file_path.exists():
+                raise FileNotFoundError(f"文件不存在: {file_id}")
+            
+            # 获取模型
+            model, config, error_msg = get_model(request.model, base_dir)
+            
+            if model is None:
+                raise Exception(f"模型加载失败: {error_msg}")
+            
+            # 执行推理
+            conf = request.conf if request.conf is not None else config.get("conf", 0.25)
+            iou = request.iou if request.iou is not None else config.get("iou", 0.45)
+            
+            inference_results = model(str(file_path), verbose=False, conf=conf, iou=iou)
+            result = inference_results[0]
+            
+            cell_count = len(result.boxes) if result.boxes is not None else 0
+            total_cells += cell_count
+            proc_time = time.time() - start_time
+            total_time += proc_time
+            
+            results.append(BatchResult(
+                file_id=file_id,
+                file_name=file_id,
+                model_used=request.model,
+                cell_count=cell_count,
+                processing_time=proc_time,
+                status="success"
+            ))
+        except Exception as e:
+            results.append(BatchResult(
+                file_id=file_id,
+                file_name=file_id,
+                model_used=request.model,
+                cell_count=0,
+                processing_time=time.time() - start_time,
+                status="failed",
+                error=str(e)
+            ))
+    
+    successful_results = [r for r in results if r.status == "success"]
+    
+    return BatchInferenceResponse(
+        total=len(request.file_ids),
+        completed=len(successful_results),
+        failed=len([r for r in results if r.status == "failed"]),
+        results=results,
+        summary={
+            "total_cells": total_cells,
+            "avg_cells_per_image": total_cells / len(successful_results) if successful_results else 0,
+            "avg_processing_time": total_time / len(successful_results) if successful_results else 0,
+            "total_processing_time": total_time
+        }
+    )

@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { Upload, message, Card, Radio, Button, Spin, Slider } from 'antd'
-import { InboxOutlined, PlayCircleOutlined, UploadOutlined, FileExcelOutlined, FileTextOutlined } from '@ant-design/icons'
+import { InboxOutlined, PlayCircleOutlined, UploadOutlined, FileExcelOutlined, FileTextOutlined, DatabaseOutlined } from '@ant-design/icons'
 import axios from 'axios'
+import { useNavigate } from 'react-router-dom'
 import ImageViewer from '@/components/ImageViewer'
 
 const { Button: RadioButton } = Radio
@@ -36,6 +37,7 @@ const VIEWER_WIDTH = 380
 const VIEWER_HEIGHT = 380
 
 const UploadPage = () => {
+  const navigate = useNavigate()
   const [selectedModel, setSelectedModel] = useState<string>('RDHS-YOLO')
   const [uploading, setUploading] = useState(false)
   const [inferring, setInferring] = useState(false)
@@ -178,15 +180,24 @@ const UploadPage = () => {
       {/* 顶部标题栏 */}
       <div style={{ 
         marginBottom: '20px',
-        textAlign: 'center',
         background: 'white',
         padding: '16px',
         borderRadius: '8px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center'
       }}>
         <h1 style={{ margin: 0, fontSize: '32px', color: '#1890ff' }}>
           🔬 细胞智能计数系统
         </h1>
+        <Button 
+          icon={<DatabaseOutlined />} 
+          onClick={() => navigate('/batch')}
+          type="primary"
+        >
+          批量检测
+        </Button>
       </div>
 
       {/* 主内容区域 */}
