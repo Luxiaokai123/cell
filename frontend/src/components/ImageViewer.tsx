@@ -21,12 +21,15 @@ const colors = ['#FF0000', '#0066FF', '#00CC66', '#FF9900', '#9933FF', '#FF66CC'
 // 根据细胞类型获取固定颜色
 const getColorForCellType = (label: string): string => {
   const colorMap: Record<string, string> = {
+    '血小板': '#0066FF',
     'red_blood_cell': '#FF0000',
     'white_blood_cell': '#0066FF',
-    'platelet': '#00CC66',
+    'platelet': '#0066FF',
+    '红细胞': '#FF0000',
+    '白细胞': '#00CC66',
     'rbc': '#FF0000',
-    'wbc': '#0066FF',
-    'platelets': '#00CC66',
+    'wbc': '#00CC66',
+    'platelets': '#0066FF',
   }
   
   // 转换为小写进行匹配
@@ -157,7 +160,7 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
                     height={height}
                     stroke={color}
                     strokeWidth={strokeWidth}
-                    fill={`${color}20`}
+                    fill="transparent"
                   />
                   {/* 标签背景 */}
                   <Rect

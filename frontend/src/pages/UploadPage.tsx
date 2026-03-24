@@ -424,6 +424,39 @@ const UploadPage = () => {
                         </span>
                       </div>
 
+                      {/* 细胞类型统计 */}
+                      {(() => {
+                        // 统计每种细胞类型的数量
+                        const typeCount: Record<string, number> = {}
+                        result.boxes.forEach(box => {
+                          const name = box.class_name || '未知'
+                          typeCount[name] = (typeCount[name] || 0) + 1
+                        })
+                        const types = Object.entries(typeCount).sort((a, b) => b[1] - a[1])
+                        
+                        return (
+                          <div style={{ 
+                            marginTop: '12px',
+                            padding: '8px',
+                            background: '#f5f5f5',
+                            borderRadius: '8px'
+                          }}>
+                            <div style={{ fontWeight: 'bold', marginBottom: '8px', color: '#333' }}>细胞类型分布</div>
+                            {types.map(([name, count], idx) => (
+                              <div key={idx} style={{ 
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                padding: '4px 0',
+                                borderBottom: idx < types.length - 1 ? '1px dashed #ddd' : 'none'
+                              }}>
+                                <span style={{ color: '#666' }}>{name}</span>
+                                <span style={{ fontWeight: 'bold', color: '#1890ff' }}>{count} 个</span>
+                              </div>
+                            ))}
+                          </div>
+                        )
+                      })()}
+
                       <Space style={{ marginTop: '16px', justifyContent: 'center' }} size="large">
                         <Button 
                           type="primary" 

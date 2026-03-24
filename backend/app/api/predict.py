@@ -128,10 +128,25 @@ async def inference(request: InferenceRequest):
                 confidences = result.boxes.conf.cpu().numpy()
                 classes = result.boxes.cls.cpu().numpy()
                 
+                # 细胞类型名称映射
+                cell_type_names = {
+                    0: '血小板',
+                    1: '白细胞',
+                    2: '红细胞',
+                    3: '淋巴细胞',
+                    4: '单核细胞',
+                    5: '嗜中性粒细胞',
+                    6: '嗜酸性粒细胞',
+                    7: '嗜碱性粒细胞',
+                }
+                
                 for i in range(len(xyxy)):
                     x1, y1, x2, y2 = xyxy[i]
                     conf = confidences[i]
                     cls = int(classes[i])
+                    
+                    # 获取细胞类型名称，如果不存在则使用默认名称
+                    class_name = cell_type_names.get(cls, f"细胞{cls}")
                     
                     boxes.append(BoxResult(
                         x1=float(x1),
@@ -139,7 +154,7 @@ async def inference(request: InferenceRequest):
                         x2=float(x2),
                         y2=float(y2),
                         confidence=float(conf),
-                        class_name=f"cell_{cls}"
+                        class_name=class_name
                     ))
             
             cell_count = len(boxes)
