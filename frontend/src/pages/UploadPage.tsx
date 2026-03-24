@@ -33,7 +33,7 @@ const VIEWER_HEIGHT = 380
 
 const UploadPage = () => {
   const navigate = useNavigate()
-  const [selectedModel, setSelectedModel] = useState<string>('auto')
+  const [selectedModel, setSelectedModel] = useState<string>('RDHS-YOLO')
   const [uploading, setUploading] = useState(false)
   const [inferring, setInferring] = useState(false)
   const [uploadedFileId, setUploadedFileId] = useState<string | null>(null)
@@ -76,9 +76,9 @@ const UploadPage = () => {
     setResult(null)
     
     try {
-      const requestData: { file_id: string; model?: string } = { file_id: uploadedFileId }
-      if (selectedModel !== 'auto') {
-        requestData.model = selectedModel
+      const requestData: { file_id: string; model: string } = { 
+        file_id: uploadedFileId,
+        model: selectedModel
       }
       
       const response = await axios.post('/api/inference', requestData)
@@ -166,14 +166,13 @@ const UploadPage = () => {
               buttonStyle="solid"
               style={{ width: '100%' }}
             >
-              <RadioButton value="auto" style={{ width: '33%' }}>🤖 自动</RadioButton>
-              <RadioButton value="RDHS-YOLO" style={{ width: '33%' }}>RDHS-YOLO</RadioButton>
-              <RadioButton value="DAS-DETR" style={{ width: '33%' }}>DAS-DETR</RadioButton>
+              <RadioButton value="RDHS-YOLO" style={{ width: '50%' }}>实例分割 RDHS-YOLO</RadioButton>
+              <RadioButton value="DAS-DETR" style={{ width: '50%' }}>目标检测 DAS-DETR</RadioButton>
             </Radio.Group>
             <div style={{ marginTop: 8, color: '#888', fontSize: 11 }}>
-              {selectedModel === 'auto' 
-                ? '系统将根据图像特征自动选择最优模型' 
-                : `强制使用 ${selectedModel} 模型进行推理`}
+              {selectedModel === 'RDHS-YOLO'
+                ? '实例分割模型，可精确勾勒细胞边界轮廓' 
+                : '目标检测模型，快速定位细胞位置'}
             </div>
           </Card>
 
@@ -208,7 +207,7 @@ const UploadPage = () => {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <div>
                     <p style={{ margin: 0, fontSize: '13px' }}>已上传：<strong>{uploadedFileName}</strong></p>
-                    <p style={{ margin: 0, color: '#888', fontSize: '11px' }}>模型：{selectedModel === 'auto' ? '自动选择' : selectedModel}</p>
+                    <p style={{ margin: 0, color: '#888', fontSize: '11px' }}>模型：{selectedModel === 'RDHS-YOLO' ? '实例分割' : '目标检测'}</p>
                   </div>
                   <Button 
                     type="primary" 
