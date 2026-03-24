@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react'
-import { Upload, message, Card, Radio, Button, Spin, Progress, Table, Slider, Row, Col, Statistic, Tag } from 'antd'
-import { InboxOutlined, PlayCircleOutlined, ArrowLeftOutlined, FileExcelOutlined, DeleteOutlined, CloseOutlined } from '@ant-design/icons'
+import { Upload, message, Card, Radio, Button, Spin, Progress, Table, Slider, Row, Col, Statistic, Tag, Modal } from 'antd'
+import { InboxOutlined, PlayCircleOutlined, ArrowLeftOutlined, FileExcelOutlined, DeleteOutlined, CloseOutlined, EyeOutlined } from '@ant-design/icons'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 
@@ -21,6 +21,8 @@ interface BatchResult {
   processing_time: number
   status: string
   error?: string
+  original_image_url?: string
+  result_image_url?: string
 }
 
 interface BatchSummary {
@@ -44,6 +46,7 @@ const BatchPage = () => {
   const [progress, setProgress] = useState(0)
   const [results, setResults] = useState<BatchResult[]>([])
   const [summary, setSummary] = useState<BatchSummary | null>(null)
+  const [previewImages, setPreviewImages] = useState<{original: string, result: string} | null>(null)
   const fileIdMap = useRef<Record<string, string>>({})
 
   // 处理文件选择
@@ -228,14 +231,23 @@ const BatchPage = () => {
       render: (time: number) => `${time.toFixed(2)}s`
     },
     {
-      title: '状态',
-      dataIndex: 'status',
-      key: 'status',
+      title: '操作',
+      key: 'action',
       width: 80,
-      render: (status: string, record: BatchResult) => (
-        status === 'success' 
-          ? <Tag color="success">成功</Tag>
-          : <Tag color="error" title={record.error}>失败</Tag>
+      render: (_: any, record: BatchResult) => (
+        record.status === 'success' && record.original_image_url ? (
+          <Button
+            type="link"
+            size="small"
+            icon={<EyeOutlined />}
+            onClick={() => setPreviewImages({
+              original: record.original_image_url!,
+              result: record.result_image_url || record.original_image_url!
+            })}
+          >
+            预览
+          </Button>
+        ) : null
       )
     }
   ]
@@ -331,7 +343,7 @@ const BatchPage = () => {
       <div style={{ 
         display: 'flex',
         gap: '20px',
-        height: '480px'
+        height: '484px'
       }}>
         {/* 左侧：上传区域 */}
         <div style={{ flex: 1, minWidth: 0 }}>
@@ -362,7 +374,7 @@ const BatchPage = () => {
               </div>
             </div>
           }
-          bodyStyle={{ padding: '4px 16px 16px', height: 'calc(480px - 57px)', overflow: 'auto' }}
+          bodyStyle={{ padding: '4px 16px 16px', height: 'calc(484px - 57px)', overflow: 'auto' }}
         >
           {/* 已选文件列表 */}
           {fileList.length > 0 && (
@@ -390,7 +402,7 @@ const BatchPage = () => {
               
               {/* 文件列表 */}
               <div style={{ 
-                maxHeight: 'calc(100vh - 480px)', 
+                maxHeight: 'calc(100vh - 484px)', 
                 overflow: 'auto',
                 border: '1px solid #f0f0f0',
                 borderRadius: 4,
@@ -453,7 +465,7 @@ const BatchPage = () => {
                 </div>
               </div>
             }
-            bodyStyle={{ padding: '16px', height: 'calc(480px - 57px)', overflow: 'auto' }}
+            bodyStyle={{ padding: '16px', height: 'calc(484px - 57px)', overflow: 'auto' }}
           >
             
             {/* 详细结果表格 */}
@@ -462,8 +474,8 @@ const BatchPage = () => {
               columns={columns}
               rowKey="file_id"
               size="small"
-              pagination={{ pageSize: 10 }}
-              scroll={{ y: 'calc(100vh - 480px)' }}
+              pagination={{ pageSize: 8 }}
+              scroll={{ y: 340 }}
             />
           </Card>
         ) : (
@@ -484,7 +496,7 @@ const BatchPage = () => {
             }
             bodyStyle={{ 
               padding: '16px', 
-              height: 'calc(480px - 57px)', 
+              height: 'calc(484px - 57px)', 
               display: 'flex', 
               alignItems: 'center', 
               justifyContent: 'center',
@@ -499,6 +511,36 @@ const BatchPage = () => {
         )}
       </div>
     </div>
+
+    {/* 图片预览弹窗 */}
+    <Modal
+      open={!!previewImages}
+      onCancel={() => setPreviewImages(null)}
+      footer={null}
+      width={1000}
+      title="图片预览"
+    >
+      {previewImages && (
+        <div style={{ display: 'flex', gap: 20 }}>
+          <div style={{ flex: 1 }}>
+            <h4 style={{ marginBottom: 12 }}>原图</h4>
+            <img 
+              src={previewImages.original} 
+              alt="原图" 
+              style={{ width: '100%', border: '1px solid #f0f0f0', borderRadius: 4 }}
+            />
+          </div>
+          <div style={{ flex: 1 }}>
+            <h4 style={{ marginBottom: 12 }}>预测结果</h4>
+            <img 
+              src={previewImages.result} 
+              alt="预测结果" 
+              style={{ width: '100%', border: '1px solid #f0f0f0', borderRadius: 4 }}
+            />
+          </div>
+        </div>
+      )}
+    </Modal>
     </div>
   )
 }

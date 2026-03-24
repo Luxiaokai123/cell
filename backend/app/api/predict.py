@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, FileResponse
 from pydantic import BaseModel
 from typing import Optional, List
 from pathlib import Path
@@ -77,6 +77,8 @@ class BatchResult(BaseModel):
     processing_time: float
     status: str  # success, failed
     error: Optional[str] = None
+    original_image_url: Optional[str] = None  # 原图URL
+    result_image_url: Optional[str] = None    # 预测结果图URL
 
 
 class BatchInferenceResponse(BaseModel):
@@ -506,7 +508,7 @@ async def batch_inference(request: BatchInferenceRequest):
             if model is None:
                 raise Exception(f"模型加载失败: {error_msg}")
             
-            # 执行推理
+            # 执行推理并保存结果图
             conf = request.conf if request.conf is not None else config.get("conf", 0.25)
             iou = request.iou if request.iou is not None else config.get("iou", 0.45)
             
@@ -518,13 +520,33 @@ async def batch_inference(request: BatchInferenceRequest):
             proc_time = time.time() - start_time
             total_time += proc_time
             
+            # 保存预测结果图
+            result_image_url = None
+            try:
+                # 生成结果图文件名
+                result_filename = f"result_{file_id}"
+                result_path = base_dir / "temp" / "uploads" / result_filename
+                
+                # 保存带标注的图片
+                result.save(str(result_path))
+                
+                # 构建访问URL
+                result_image_url = f"/api/images/{result_filename}"
+            except Exception as save_error:
+                print(f"[WARNING] 保存结果图失败: {save_error}")
+            
+            # 原图URL
+            original_image_url = f"/api/images/{file_id}"
+            
             results.append(BatchResult(
                 file_id=file_id,
                 file_name=file_id,
                 model_used=request.model,
                 cell_count=cell_count,
                 processing_time=proc_time,
-                status="success"
+                status="success",
+                original_image_url=original_image_url,
+                result_image_url=result_image_url
             ))
         except Exception as e:
             results.append(BatchResult(
@@ -551,3 +573,21 @@ async def batch_inference(request: BatchInferenceRequest):
             "total_processing_time": total_time
         }
     )
+
+
+@router.get("/images/{filename}")
+async def get_image(filename: str):
+    """获取图片文件（原图或预测结果图）"""
+    base_dir = Path(__file__).parent.parent.parent
+    
+    # 尝试多个路径
+    possible_paths = [
+        base_dir / "temp" / "uploads" / filename,
+        base_dir / "app" / "temp" / "uploads" / filename,
+    ]
+    
+    for file_path in possible_paths:
+        if file_path.exists():
+            return FileResponse(str(file_path))
+    
+    raise HTTPException(status_code=404, detail=f"图片不存在: {filename}")
